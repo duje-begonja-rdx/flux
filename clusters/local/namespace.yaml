@@ -3,3 +3,8 @@ kind: Namespace
 metadata:
   name: ethereum-mainnet
 ---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: monitoring
+---
