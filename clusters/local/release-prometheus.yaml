@@ -77,7 +77,7 @@ spec:
       #   pathType: ImplementationSpecific
       #   enabled: true
       #   ingressClassName: nginx
-    prometheusOperator:
+    prometheusOperator: {}
       # prometheusConfigReloader:
       #   # resources: 
       #   #   requests:
