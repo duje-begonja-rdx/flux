@@ -1,0 +1,121 @@
+---
+apiVersion: source.toolkit.fluxcd.io/v1beta2
+kind: HelmRepository
+metadata:
+  name: kube-prometheus-stack
+  namespace: monitoring
+spec:
+  interval: 20m
+  url: https://prometheus-community.github.io/helm-charts
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: kube-prometheus-stack
+  namespace: monitoring
+spec:
+  interval: 20m
+  releaseName: kube-prometheus-stack
+  targetNamespace: monitoring
+  chart:
+    spec:
+      interval: 20m
+      chart: kube-prometheus-stack
+      version: 82.4.3
+      sourceRef:
+        kind: HelmRepository
+        name: kube-prometheus-stack
+        namespace: monitoring
+  values:
+    defaultRules:
+      rules:
+        kubeScheduler: false
+        kubeSchedulerAlerting: false
+        kubeSchedulerRecording: false
+        etcd: false
+        kubeStateMetrics: false
+        kubeApiserverAvailability: false
+      disabled:
+        KubeletPodStartUpLatencyHigh: true
+        KubeletTooManyPods: true
+        KubeMemoryOvercommit: true
+        KubeCPUOvercommit: true
+        InfoInhibitor: true
+        KubeAPIErrorBudgetBurn: true
+    kubelet:
+      enabled: true
+      serviceMonitor:
+        https: true
+        resource: false
+    kubeControllerManager:
+      enabled: false
+    kubeScheduler:
+      enabled: false
+    kubeProxy:
+      enabled: false
+    kubeEtcd:
+      enabled: false
+    kubeApiServer:
+      enabled: false
+    prometheus:
+      prometheusSpec:
+        scrapeInterval: 15s
+        # Monitor all namespaces for rules, serviceMonitors and probes.
+        ruleSelector: {}
+        ruleNamespaceSelector: {}
+        ruleSelectorNilUsesHelmValues: false
+        serviceMonitorSelector: {}
+        serviceMonitorNamespaceSelector: {}
+        serviceMonitorSelectorNilUsesHelmValues: false
+        probeSelector: {}
+        probeNamespaceSelector: {}
+        probeSelectorNilUsesHelmValues: false
+        replicas: 1
+        retention: "6w"
+        retentionSize: "20GB"
+      # ingress:
+      #   pathType: ImplementationSpecific
+      #   enabled: true
+      #   ingressClassName: nginx
+    prometheusOperator:
+      # prometheusConfigReloader:
+      #   # resources: 
+      #   #   requests:
+      #   #     cpu: 50m
+    grafana:
+      enabled: true
+      adminPassword: Admin12345
+      defaultDashboardsEnabled: true
+      # prometheus-grafana pod hangs on update with "Multi-Attach error for #
+      # volume", because it's default deploymentStrategy is RollingUpdate,
+      # which # doesn't work with deployments with persistent volumes.
+      deploymentStrategy:
+        type: Recreate
+
+      serviceMonitor:
+        enabled: true
+        interval: 15s
+        scrapeTimeout: 15s
+
+      # additionalDataSources:
+      # - name: Loki
+      #   type: loki
+      #   access: proxy
+      #   url: 'http://loki:3100'
+
+      persistence:
+        enabled: false
+    alertmanager:
+      enabled: true
+
+      alertmanagerSpec:
+        # The secret name should be: alertmanager-prometheus-operator-kube-p-alertmanager
+        # Ref: https://github.com/prometheus-community/helm-charts/blob/bd7f3ca7efb7b5806b720b098144d1240c930a70/charts/kube-prometheus-stack/templates/alertmanager/secret.yaml#L5
+        #useExistingSecret: true
+        replicas: 2
+        # resources:
+        #   limits:
+        #     memory: 512Mi
+        #   requests:
+        #     cpu: 20m
+        #     memory: 60Mi
