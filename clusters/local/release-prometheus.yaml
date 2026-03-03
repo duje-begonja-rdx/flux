@@ -27,6 +27,7 @@ spec:
         name: kube-prometheus-stack
         namespace: monitoring
   values:
+    fullnameOverride: "kps"
     defaultRules:
       rules:
         kubeScheduler: false
