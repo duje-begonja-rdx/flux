@@ -60,6 +60,8 @@ spec:
       enabled: false
     prometheus:
       prometheusSpec:
+        externalLabels:
+          cluster: "minikube"
         scrapeInterval: 15s
         # Monitor all namespaces for rules, serviceMonitors and probes.
         ruleSelector: {}
