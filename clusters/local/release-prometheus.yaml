@@ -5,12 +5,12 @@ metadata:
   name: kps
   namespace: monitoring
 spec:
-  interval: 20m
+  interval: 10m
   releaseName: kps
   targetNamespace: monitoring
   chart:
     spec:
-      interval: 20m
+      interval: 60m
       chart: kube-prometheus-stack
       version: 82.4.3
       sourceRef:
@@ -86,16 +86,20 @@ spec:
       deploymentStrategy:
         type: Recreate
 
+      service:
+        type: NodePort
+        nodePort: 32000
+
       serviceMonitor:
         enabled: true
         interval: 15s
         scrapeTimeout: 15s
 
-      # additionalDataSources:
-      # - name: Loki
-      #   type: loki
-      #   access: proxy
-      #   url: 'http://loki:3100'
+      additionalDataSources:
+      - name: Loki
+        type: loki
+        access: proxy
+        url: 'http://loki:3100'
 
       persistence:
         enabled: false
@@ -103,13 +107,4 @@ spec:
       enabled: true
 
       alertmanagerSpec:
-        # The secret name should be: alertmanager-prometheus-operator-kube-p-alertmanager
-        # Ref: https://github.com/prometheus-community/helm-charts/blob/bd7f3ca7efb7b5806b720b098144d1240c930a70/charts/kube-prometheus-stack/templates/alertmanager/secret.yaml#L5
-        #useExistingSecret: true
-        replicas: 2
-        # resources:
-        #   limits:
-        #     memory: 512Mi
-        #   requests:
-        #     cpu: 20m
-        #     memory: 60Mi
+        replicas: 1
