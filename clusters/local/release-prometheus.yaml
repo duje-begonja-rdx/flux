@@ -79,6 +79,11 @@ spec:
     grafana:
       enabled: true
       adminPassword: Admin12345
+      ingress:
+        enabled: true
+        hosts:
+        - grafana.localhost
+        ingressClassName: traefik
       defaultDashboardsEnabled: true
       # prometheus-grafana pod hangs on update with "Multi-Attach error for #
       # volume", because it's default deploymentStrategy is RollingUpdate,
