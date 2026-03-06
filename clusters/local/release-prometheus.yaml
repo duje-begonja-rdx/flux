@@ -50,40 +50,28 @@ spec:
     kubeApiServer:
       enabled: false
     prometheus:
+      ingress:
+        enabled: true
+        ingressClassName: traefik
+        hosts:
+        - prometheus.localhost
       prometheusSpec:
         externalLabels:
           cluster: "minikube"
-        scrapeInterval: 15s
-        # Monitor all namespaces for rules, serviceMonitors and probes.
-        ruleSelector: {}
-        ruleNamespaceSelector: {}
-        ruleSelectorNilUsesHelmValues: false
-        serviceMonitorSelector: {}
-        serviceMonitorNamespaceSelector: {}
-        serviceMonitorSelectorNilUsesHelmValues: false
-        probeSelector: {}
-        probeNamespaceSelector: {}
-        probeSelectorNilUsesHelmValues: false
+        scrapeInterval: 30s
         replicas: 1
         retention: "6w"
         retentionSize: "20GB"
-      # ingress:
-      #   pathType: ImplementationSpecific
-      #   enabled: true
-      #   ingressClassName: nginx
-    prometheusOperator: {}
-      # prometheusConfigReloader:
-      #   # resources: 
-      #   #   requests:
-      #   #     cpu: 50m
+
     grafana:
       enabled: true
       adminPassword: Admin12345
       ingress:
         enabled: true
+        ingressClassName: traefik
         hosts:
         - grafana.localhost
-        ingressClassName: traefik
+        
       defaultDashboardsEnabled: true
       # prometheus-grafana pod hangs on update with "Multi-Attach error for #
       # volume", because it's default deploymentStrategy is RollingUpdate,
@@ -91,13 +79,9 @@ spec:
       deploymentStrategy:
         type: Recreate
 
-      # service:
-      #   type: NodePort
-      #   nodePort: 32000
-
       serviceMonitor:
         enabled: true
-        interval: 15s
+        interval: 30s
         scrapeTimeout: 15s
 
       additionalDataSources:
@@ -108,8 +92,13 @@ spec:
 
       persistence:
         enabled: false
+
     alertmanager:
       enabled: true
-
+      ingress:
+        enabled: true
+        ingressClassName: traefik
+        hosts:
+        - alertmanager.localhost
       alertmanagerSpec:
         replicas: 1

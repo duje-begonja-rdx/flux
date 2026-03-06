@@ -5,3 +5,4 @@ resources:
   - ./helm-repositories.yaml
   - ./release-promtail.yaml
   - ./release-prometheus.yaml
+  - ./traefik.yaml
