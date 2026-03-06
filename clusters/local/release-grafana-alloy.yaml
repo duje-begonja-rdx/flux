@@ -11,7 +11,7 @@ spec:
   chart:
     spec:
       interval: 20m
-      chart: grafana-alloy
+      chart: alloy
       version: 1.6.1
       sourceRef:
         kind: HelmRepository
