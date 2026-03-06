@@ -36,6 +36,8 @@ spec:
       enabled: false
     persistence:
       enabled: false
+    test:
+      enabled: false
     lokiCanary:
       enabled: false
 
