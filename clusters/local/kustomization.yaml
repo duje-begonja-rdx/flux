@@ -3,6 +3,7 @@ kind: Kustomization
 resources:
   - ./namespace.yaml
   - ./helm-repositories.yaml
-  - ./release-promtail.yaml
   - ./release-prometheus.yaml
+  - ./release-loki.yaml
+  - ./release-grafana-alloy.yaml
   - ./traefik.yaml
