@@ -25,6 +25,29 @@ resource "helm_release" "flux_operator" {
 
   repository = "oci://ghcr.io/controlplaneio-fluxcd/charts"
   chart      = "flux-operator"
+
+  set = [
+    {
+      name  = "web.ingress.enabled"
+      value = "true"
+    },
+    {
+      name  = "web.ingress.className"
+      value = "traefik"
+    },
+    {
+      name  = "web.ingress.hosts[0].host"
+      value = "flux.localhost"
+    },
+    {
+    name  = "web.ingress.hosts[0].paths[0].path"
+    value = "/"
+  },
+  {
+    name  = "web.ingress.hosts[0].paths[0].pathType"
+    value = "Prefix"
+  }
+  ]
 }
 
 resource "kubernetes_manifest" "flux_instance" {
