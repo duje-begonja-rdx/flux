@@ -91,9 +91,9 @@ spec:
       deploymentStrategy:
         type: Recreate
 
-      service:
-        type: NodePort
-        nodePort: 32000
+      # service:
+      #   type: NodePort
+      #   nodePort: 32000
 
       serviceMonitor:
         enabled: true
