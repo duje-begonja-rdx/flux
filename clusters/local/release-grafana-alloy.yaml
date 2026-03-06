@@ -1,0 +1,70 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: alloy
+  namespace: monitoring
+spec:
+  interval: 20m
+  releaseName: alloy
+  targetNamespace: monitoring
+  chart:
+    spec:
+      interval: 20m
+      chart: grafana-alloy
+      version: 1.6.1
+      sourceRef:
+        kind: HelmRepository
+        name: grafana
+        namespace: helm-repos
+  values:
+alloy:
+  configMap:
+    create: true
+    content: |
+      logging {
+        level  = "info"
+        format = "logfmt"
+      }
+
+      discovery.kubernetes "pods" {
+        role = "pod"
+      }
+
+      loki.source.kubernetes "pods" {
+        targets    = discovery.kubernetes.pods.targets
+        forward_to = [loki.relabel.k8s.receiver]
+      }
+
+      loki.relabel "k8s" {
+        forward_to = [loki.write.loki.receiver]
+
+        // instance looks like: "namespace/pod:container"
+        rule {
+          source_labels = ["instance"]
+          regex         = "([^/]+)/([^:]+):(.+)"
+          target_label  = "namespace"
+          replacement   = "$1"
+        }
+
+        rule {
+          source_labels = ["instance"]
+          regex         = "([^/]+)/([^:]+):(.+)"
+          target_label  = "pod"
+          replacement   = "$2"
+        }
+
+        rule {
+          source_labels = ["instance"]
+          regex         = "([^/]+)/([^:]+):(.+)"
+          target_label  = "container"
+          replacement   = "$3"
+        }
+      }
+
+      loki.write "loki" {
+        endpoint {
+          url       = "http://loki-gateway.logs.svc.cluster.local:80/loki/api/v1/push"
+          tenant_id = "local"
+        }
+      }
