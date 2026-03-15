@@ -1,0 +1,4 @@
+resources:
+  - namespaces.yaml
+  - repositories.yaml
+  - ./observability

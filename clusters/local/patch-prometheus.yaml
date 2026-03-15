@@ -1,0 +1,88 @@
+---
+- op: replace
+  path: "/spec/values"
+  value:
+    fullnameOverride: "kps"
+    defaultRules:
+      rules:
+        kubeScheduler: false
+        kubeSchedulerAlerting: false
+        kubeSchedulerRecording: false
+        etcd: false
+        kubeStateMetrics: false
+        kubeApiserverAvailability: false
+      disabled:
+        KubeletPodStartUpLatencyHigh: true
+        KubeletTooManyPods: true
+        KubeMemoryOvercommit: true
+        KubeCPUOvercommit: true
+        InfoInhibitor: true
+        KubeAPIErrorBudgetBurn: true
+    kubelet:
+      enabled: true
+      serviceMonitor:
+        https: true
+        resource: false
+    kubeControllerManager:
+      enabled: false
+    kubeScheduler:
+      enabled: false
+    kubeProxy:
+      enabled: false
+    kubeEtcd:
+      enabled: false
+    kubeApiServer:
+      enabled: false
+    prometheus:
+      ingress:
+        enabled: true
+        ingressClassName: traefik
+        hosts:
+        - prometheus.localhost
+      prometheusSpec:
+        externalLabels:
+          cluster: "minikube"
+        scrapeInterval: 30s
+        replicas: 1
+        retention: "6w"
+        retentionSize: "20GB"
+
+    grafana:
+      enabled: true
+      adminPassword: Admin12345
+      ingress:
+        enabled: true
+        ingressClassName: traefik
+        hosts:
+        - grafana.localhost
+        
+      defaultDashboardsEnabled: true
+      # prometheus-grafana pod hangs on update with "Multi-Attach error for #
+      # volume", because it's default deploymentStrategy is RollingUpdate,
+      # which # doesn't work with deployments with persistent volumes.
+      deploymentStrategy:
+        type: Recreate
+
+      serviceMonitor:
+        enabled: true
+        interval: 30s
+        scrapeTimeout: 15s
+
+      additionalDataSources:
+      - name: Loki
+        type: loki
+        access: proxy
+        url: 'http://loki:3100'
+
+      persistence:
+        enabled: false
+
+    alertmanager:
+      enabled: true
+      ingress:
+        enabled: true
+        ingressClassName: traefik
+        hosts:
+        - alertmanager.localhost
+      alertmanagerSpec:
+        replicas: 1
