@@ -3,6 +3,7 @@ kind: Kustomization
 resources:
   - ../../common/
   - ./traefik.yaml
+  - ./repositories.yaml
   - ./release-route-counter.yaml
 patches:
   - target:
