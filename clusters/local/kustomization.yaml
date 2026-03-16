@@ -3,7 +3,7 @@ kind: Kustomization
 resources:
   - ../../common/
   - ./traefik.yaml
-  - ./release-python-endpoint-counter.yaml
+  - ./release-route-counter.yaml
 patches:
   - target:
       group: helm.toolkit.fluxcd.io
