@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "ethereum-component.headlessServiceName" . }}
+  labels:
+    {{- include "ethereum-component.componentLabels" (dict "context" . "Chart" .Chart "Values" .Values "Release" .Release) | nindent 4 }}
+spec:
+  clusterIP: None
+  selector:
+    app.kubernetes.io/name: {{ include "ethereum-component.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/component: {{ include "ethereum-component.name" . }}
+  ports:
+    {{- range $port := .Values.ports }}
+    {{- if not (and $.Values.metrics.enabled (eq $port.name $.Values.metrics.portName)) }}
+    - name: {{ $port.name }}
+      port: {{ $port.servicePort | default $port.containerPort }}
+      targetPort: {{ $port.name }}
+      protocol: {{ $port.protocol | default "TCP" }}
+    {{- end }}
+    {{- end }}

@@ -1,0 +1,19 @@
+{{- if and .Values.serviceMonitor.enabled .Values.metrics.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "ethereum-component.fullname" . }}
+  labels:
+    {{- toYaml .Values.serviceMonitor.labels | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "ethereum-component.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      app.kubernetes.io/component: {{ include "ethereum-component.name" . }}
+  endpoints:
+    - port: metrics
+      path: {{ .Values.metrics.path }}
+      interval: 15s
+      scrapeTimeout: 10s
+{{- end }}

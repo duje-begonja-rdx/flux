@@ -1,0 +1,81 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "ethereum-component.fullname" . }}
+  labels:
+    {{- include "ethereum-component.componentLabels" (dict "context" . "Chart" .Chart "Values" .Values "Release" .Release) | nindent 4 }}
+spec:
+  serviceName: {{ include "ethereum-component.headlessServiceName" . }}
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "ethereum-component.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      app.kubernetes.io/component: {{ include "ethereum-component.name" . }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "ethereum-component.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        app.kubernetes.io/component: {{ include "ethereum-component.name" . }}
+    spec:
+      terminationGracePeriodSeconds: 60
+      enableServiceLinks: false
+      containers:
+        - name: {{ .Values.containerName }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- if .Values.params }}
+          env:
+            {{- range $key, $value := .Values.params }}
+            - name: {{ $key }}
+              value: {{ tpl ($value | toString) $ | quote }}
+            {{- end }}
+          {{- end }}
+          ports:
+            {{- range $port := .Values.ports }}
+            - name: {{ $port.name }}
+              containerPort: {{ $port.containerPort }}
+              protocol: {{ $port.protocol | default "TCP" }}
+            {{- end }}
+          {{- with .Values.readinessProbe }}
+          readinessProbe:
+{{ toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.livenessProbe }}
+          livenessProbe:
+{{ toYaml . | nindent 12 }}
+          {{- end }}
+          resources:
+{{ toYaml .Values.resources | indent 12 }}
+          volumeMounts:
+            - name: {{ .Values.storage.claimName }}
+              mountPath: /data
+            - name: jwt
+              mountPath: {{ .Values.jwt.mountPath }}
+              readOnly: true
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+{{ toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+{{ toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+{{ toYaml . | nindent 8 }}
+      {{- end }}
+      volumes:
+        - name: jwt
+          secret:
+            secretName: {{ .Values.jwt.secretName }}
+  volumeClaimTemplates:
+    - metadata:
+        name: {{ .Values.storage.claimName }}
+      spec:
+        accessModes:
+          - {{ .Values.storage.accessMode }}
+        resources:
+          requests:
+            storage: {{ .Values.storage.size }}

@@ -1,0 +1,164 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ethereum-ephemery
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: eth-jwt
+  namespace: ethereum-ephemery
+type: Opaque
+stringData:
+  jwt.hex: "5dd19aa4d37f907a32ebc12f90e4e845a4566198e712faf6972e1df369fea7e5"
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: eth-geth
+  namespace: ethereum-ephemery
+spec:
+  releaseName: eth-geth
+  interval: 20m
+  targetNamespace: ethereum-ephemery
+  chart:
+    spec:
+      interval: 20m
+      chart: ./charts/ethereum-component
+      sourceRef:
+        kind: GitRepository
+        name: proprietary
+        namespace: helm-repos
+  values:
+    nameOverride: "eth-geth"
+    image:
+      repository: ethereum/client-go
+      tag: v1.16.8
+      pullPolicy: IfNotPresent
+    replicaCount: 1
+    containerName: geth
+    storage:
+      claimName: data
+      size: 60Gi
+      accessMode: ReadWriteOnce
+    jwt:
+      secretName: eth-jwt
+      key: jwt.hex
+      mountPath: /jwt
+    params:
+      GETH_EPHEMERY: "true"
+      GETH_DATADIR: "/data"
+      GETH_SYNCMODE: "snap"
+      GETH_VERBOSITY: "3"
+      GETH_PORT: "30303"
+      GETH_HTTP: "true"
+      GETH_HTTP_ADDR: "0.0.0.0"
+      GETH_HTTP_PORT: "8545"
+      GETH_HTTP_API: "eth,net,web3,admin"
+      GETH_HTTP_VHOSTS: "*"
+      GETH_AUTHRPC_ADDR: "0.0.0.0"
+      GETH_AUTHRPC_PORT: "8551"
+      GETH_AUTHRPC_VHOSTS: "*"
+      GETH_AUTHRPC_JWTSECRET: "/jwt/jwt.hex"
+      GETH_METRICS: "true"
+      GETH_METRICS_ADDR: "0.0.0.0"
+      GETH_METRICS_PORT: "6060"
+    ports:
+      - name: p2p-tcp
+        containerPort: 30303
+        servicePort: 30303
+        protocol: TCP
+      - name: p2p-udp
+        containerPort: 30303
+        servicePort: 30303
+        protocol: UDP
+      - name: authrpc
+        containerPort: 8551
+        servicePort: 8551
+        protocol: TCP
+      - name: json-rpc
+        containerPort: 8545
+        servicePort: 8545
+        protocol: TCP
+      - name: metrics
+        containerPort: 6060
+        servicePort: 6060
+        protocol: TCP
+    metrics:
+      enabled: true
+      portName: metrics
+      servicePort: 6060
+      path: /debug/metrics/prometheus
+    resources:
+      limits:
+        cpu: 4
+        memory: 8Gi
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: eth-prysm
+  namespace: ethereum-ephemery
+spec:
+  releaseName: eth-prysm
+  interval: 20m
+  targetNamespace: ethereum-ephemery
+  chart:
+    spec:
+      interval: 20m
+      chart: ./charts/ethereum-component
+      sourceRef:
+        kind: GitRepository
+        name: proprietary
+        namespace: helm-repos
+  values:
+    nameOverride: "eth-prysm"
+    image:
+      repository: prysmaticlabs/prysm-beacon-chain
+      tag: v7.1.2
+      pullPolicy: IfNotPresent
+    replicaCount: 1
+    containerName: prysm-beacon
+    storage:
+      claimName: data
+      size: 60Gi
+      accessMode: ReadWriteOnce
+    jwt:
+      secretName: eth-jwt
+      key: jwt.hex
+      mountPath: /jwt
+    params:
+      PRYSM_EPHEMERY: "true"
+      PRYSM_DATADIR: "/data"
+      PRYSM_ACCEPT_TERMS_OF_USE: "true"
+      PRYSM_VERBOSITY: "info"
+      PRYSM_CHECKPOINT_SYNC_URL: "https://checkpoint-sync.ephemery.ethpandaops.io"
+      PRYSM_GENESIS_BEACON_API_URL: "https://checkpoint-sync.ephemery.ethpandaops.io"
+      PRYSM_EXECUTION_ENDPOINT: "http://eth-geth-0.eth-geth.{{ .Release.Namespace }}.svc:8551"
+      PRYSM_JWT_SECRET: "/jwt/jwt.hex"
+      PRYSM_P2P_TCP_PORT: "13000"
+      PRYSM_P2P_UDP_PORT: "12000"
+      PRYSM_MONITORING_HOST: "0.0.0.0"
+    ports:
+      - name: p2p-tcp
+        containerPort: 13000
+        servicePort: 13000
+        protocol: TCP
+      - name: p2p-udp
+        containerPort: 12000
+        servicePort: 12000
+        protocol: UDP
+      - name: monitoring
+        containerPort: 8080
+        servicePort: 8080
+        protocol: TCP
+    metrics:
+      enabled: true
+      portName: monitoring
+      servicePort: 8080
+      path: /metrics
+    resources:
+      limits:
+        cpu: 2
+        memory: 7Gi

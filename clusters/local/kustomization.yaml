@@ -5,6 +5,7 @@ resources:
   - ./traefik.yaml
   - ./repositories.yaml
   - ./release-route-counter.yaml
+  - ./release-eth-ephemery.yaml
 patches:
   - target:
       group: helm.toolkit.fluxcd.io

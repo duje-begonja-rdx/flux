@@ -1,0 +1,71 @@
+nameOverride: ""
+fullnameOverride: ""
+
+serviceMonitor:
+  enabled: true
+  labels:
+    release: kps
+
+image:
+  repository: ethereum/client-go
+  tag: v1.16.8
+  pullPolicy: IfNotPresent
+
+replicaCount: 1
+containerName: client
+
+storage:
+  claimName: data
+  size: 60Gi
+  accessMode: ReadWriteOnce
+
+jwt:
+  secretName: eth-jwt
+  key: jwt.hex
+  mountPath: /jwt
+
+params: {}
+  # GETH_EPHEMERY: "true"
+  # GETH_DATADIR: "/data"
+  # GETH_SYNCMODE: "snap"
+  # GETH_VERBOSITY: "3"
+  # GETH_PORT: "30303"
+  # GETH_HTTP: "true"
+  # GETH_HTTP_ADDR: "0.0.0.0"
+  # GETH_HTTP_PORT: "8545"
+  # GETH_HTTP_API: "eth,net,web3,admin"
+  # GETH_HTTP_VHOSTS: "*"
+  # GETH_AUTHRPC_ADDR: "0.0.0.0"
+  # GETH_AUTHRPC_PORT: "8551"
+  # GETH_AUTHRPC_VHOSTS: "*"
+  # GETH_AUTHRPC_JWTSECRET: "/jwt/jwt.hex"
+  # GETH_METRICS: "true"
+  # GETH_METRICS_ADDR: "0.0.0.0"
+  # GETH_METRICS_PORT: "6060"
+
+  # PRYSM_MAINNET: "true"
+  # PRYSM_DATADIR: "/data"
+  # PRYSM_ACCEPT_TERMS_OF_USE: "true"
+  # PRYSM_VERBOSITY: "info"
+  # PRYSM_CHECKPOINT_SYNC_URL: "https://beaconstate.info"
+  # PRYSM_GENESIS_BEACON_API_URL: "https://beaconstate.info"
+  # PRYSM_EXECUTION_ENDPOINT: "http://eth-geth-0.eth-geth.{{ .Release.Namespace }}.svc:8551"
+  # PRYSM_JWT_SECRET: "/jwt/jwt.hex"
+  # PRYSM_P2P_TCP_PORT: "13000"
+  # PRYSM_P2P_UDP_PORT: "12000"
+  # PRYSM_MONITORING_HOST: "0.0.0.0"
+
+
+
+ports: []
+  # - name: p2p-tcp
+  #   containerPort: 30303
+  #   servicePort: 30303
+  #   protocol: TCP
+
+metrics:
+  enabled: false
+  portName: metrics
+  servicePort: 6060
+  path: /metrics
+
