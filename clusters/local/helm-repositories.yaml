@@ -6,7 +6,7 @@ metadata:
   namespace: helm-repos
 spec:
   interval: 180m
-  url: https://github.com/duje-begonja-rdx/flux
+  url: https://github.com/duje-begonja-rdx/flux.git
   ref:
     branch: main
 ---
