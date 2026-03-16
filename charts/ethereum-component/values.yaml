@@ -55,7 +55,9 @@ params: {}
   # PRYSM_P2P_UDP_PORT: "12000"
   # PRYSM_MONITORING_HOST: "0.0.0.0"
 
-
+args: []
+  # - "--mainnet"
+  # - "--datadir=/data"
 
 ports: []
   # - name: p2p-tcp
@@ -68,4 +70,3 @@ metrics:
   portName: metrics
   servicePort: 6060
   path: /metrics
-

@@ -25,6 +25,12 @@ spec:
         - name: {{ .Values.containerName }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- if .Values.args }}
+          args:
+            {{- range $arg := .Values.args }}
+            - {{ tpl ($arg | toString) $ | quote }}
+            {{- end }}
+          {{- end }}
           {{- if .Values.params }}
           env:
             {{- range $key, $value := .Values.params }}
