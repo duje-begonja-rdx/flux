@@ -1,0 +1,233 @@
+##########################################################
+# Name of the application.
+##########################################################
+nameOverride: "application"
+
+fullnameOverride: ""
+
+##########################################################
+# Deployment
+##########################################################
+
+image:
+  repository: docker.io/kagunda/application
+  pullPolicy: Always
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: ""
+
+docker_secret:
+  enabled: true
+  name: docker.io/kagunda
+  secret_name: application
+
+imagePullSecrets:
+  - name: application
+
+params: {}
+
+replicaCount: 1
+
+initContainers: {}
+  # - image: busybox
+  #   imagePullPolicy: IfNotPresent
+  #   command: ['/bin/sh']
+  # migrations:
+  #   image: "docker.io/kagunda/blend-clinch:123"
+  #   command: ["bash", "-cxe"]
+  #   args:
+  #     - "cd /app/apps/clinch && ./migrate-db.sh"
+ports: []
+  #- containerPort: 3000
+  #  name: http
+  #  protocol: TCP
+  #- containerPort: 9209
+  #  name: pm2
+  #  protocol: TCP
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+resources: {}
+  # limits:
+  #   memory: 256Mi
+  #   cpu: 0.5
+  # requests:
+  #   memory: 128Mi
+  #   cpu: 0.1
+
+podAnnotations: {}
+
+podSecurityContext: {}
+
+securityContext: {}
+  # fsGroup: 2000
+
+nodeSelector: {}
+
+tolerations: {}
+
+affinity: {}
+
+##########################################################
+# Service object for servicing pods
+##########################################################
+
+service:
+  ports:
+    - port: 80
+      name: http
+      protocol: TCP
+      targetPort: http
+  type: ClusterIP
+
+##########################################################
+# Secrets
+##########################################################
+
+secrets: []
+  # - external_secret_name: external_secret_name
+  #   env_variable: "ENVIRONMENT_VARIABLE_NAME"
+  #   aws_secret_name: "aws_secret_name"
+  #   aws_secret_key: "key_in_aws_secret"
+  #   secret_key: "key_in_kubernetes_secret"
+
+##########################################################
+# Ingress object for exposing services
+##########################################################
+
+ingress:
+  enabled: false
+  basic_auth: false
+  className: ""
+  annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # nginx.ingress.kubernetes.io/auth-signin: https://oauth2-proxy.rdx-works-main.extratools.works/oauth2/start
+    # nginx.ingress.kubernetes.io/auth-url: https://oauth2-proxy.rdx-works-main.extratools.works/oauth2/auth
+  hosts:
+    - host: chart-example.local
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls: []
+
+##########################################################
+# HPA - Horizontal Pod Autoscaling
+##########################################################
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+  targetMemoryUtilizationPercentage: 80
+
+##########################################################
+# Service Monitor to collect Prometheus metrics
+##########################################################
+serviceMonitor:
+  enabled: false
+  
+  # Additional labels
+  additionalLabels: {}
+    # key: value
+
+  # Additional annotations
+  annotations: {}
+    # key: value
+
+  # List of the endpoints of service from which prometheus will scrape data
+  endpoints: []
+  # - interval: 5s
+  #   path: /metrics
+  #   port: http
+
+#################################################################
+# PrometheusRule object for defining application alerting rules
+#################################################################
+alerts:
+  enabled: false
+
+prometheusRule:
+  enabled: false
+  
+  # PrometheusRule labels
+  additionalLabels: {}
+    # prometheus: enabled
+    # role: alert-rules
+
+  # Groups with alerting rules. Read more here [https://docs.openshift.com/container-platform/4.7/rest_api/monitoring_apis/prometheusrule-monitoring-coreos-com-v1.html]
+
+  groups: []
+    # - name: example-app-uptime
+    #   rules:
+    #     - alert: ExampleAppDown
+    #       annotations:
+    #         message: >-
+    #           The Example App is Down (Test Alert)
+    #       expr: up{namespace="test-app"} == 0
+    #       for: 1m
+    #       labels:
+    #         severity: critical
+    # - name: DashboardRDS
+    #     rules:
+    #     - alert: RDSCpuUtilizationHigh
+    #       expr: aws_rds_cpuutilization_average *on(dbinstance_identifier) group_left(tag_kagunda_rds_cluster) aws_resource_info{dbinstance_identifier=~"{{ .Values.alerts.rds_cluster_name }}.*"} > 80
+    #       for: 15m
+    #       labels:
+    #         severity: warning
+    #         tier: application
+    #         application: dashboard
+    #         namespace: {{ .Release.Namespace }}
+    #         cluster: {{ .Values.alerts.labels.cluster }}
+    #         env: {{ .Values.alerts.labels.env }}
+    #       annotations:
+    #         summary: {{`"High CPU utilization for {{ $labels.dbinstance_identifier }} instance."`}}
+    #         description: {{`"The CPU utilization of RDS {{ $labels.dbinstance_identifier }} instance is over 80% for 15mins."`}}
+    #         runbook_url: "https://runbooks.extratools.works"
+
+    #     - alert: RDSCpuUtilizationCritical
+    #       expr: aws_rds_cpuutilization_average *on(dbinstance_identifier) group_left(tag_kagunda_rds_cluster) aws_resource_info{dbinstance_identifier=~"{{ .Values.alerts.rds_cluster_name }}.*"} > 90
+    #       for: 30m
+    #       labels:
+    #         severity: critical
+    #         tier: application
+    #         application: dashboard
+    #         namespace: {{ .Release.Namespace }}
+    #         cluster: {{ .Values.alerts.labels.cluster }}
+    #         env: {{ .Values.alerts.labels.env }}
+    #       annotations:
+    #         summary: {{`"High CPU utilization for {{ $labels.dbinstance_identifier }} instance."`}}
+    #         description: {{`"The CPU utilization of RDS {{ $labels.dbinstance_identifier }} instance is over 90% for 15mins."`}}
+    #         runbook_url: "https://runbooks.extratools.works"
+
+    #     - alert: RDSLowFreeRamHigh
+    #       expr: aws_rds_freeable_memory_average *on(dbinstance_identifier) group_left(tag_kagunda_rds_cluster) aws_resource_info{dbinstance_identifier=~"{{ .Values.alerts.rds_cluster_name }}.*"} < {{ .Values.alerts.free_rds_ram_warning_threshold_in_bytes }}
+    #       for: 15m
+    #       labels:
+    #         severity: warning
+    #         tier: application
+    #         application: dashboard
+    #         namespace: {{ .Release.Namespace }}
+    #         cluster: {{ .Values.alerts.labels.cluster }}
+    #         env: {{ .Values.alerts.labels.env }}
+    #       annotations:
+    #         summary: {{`"Low free RAM for {{ $labels.dbinstance_identifier }} instance."`}}
+    #         description: "RDS instance is having less than {{ .Values.alerts.free_rds_ram_warning_threshold }} for 15mins"
+    #         runbook_url: "https://runbooks.extratools.works"
+
+    #     - alert: RDSLowFreeRamCritical
+    #       expr: aws_rds_freeable_memory_average *on(dbinstance_identifier) group_left(tag_kagunda_rds_cluster) aws_resource_info{dbinstance_identifier=~"{{ .Values.alerts.rds_cluster_name }}.*"} < {{ .Values.alerts.free_rds_ram_critical_threshold_in_bytes }}
+    #       for: 30m
+    #       labels:
+    #         severity: critical
+    #         tier: application
+    #         application: dashboard
+    #         namespace: {{ .Release.Namespace }}
+    #         cluster: {{ .Values.alerts.labels.cluster }}
+    #         env: {{ .Values.alerts.labels.env }}
+    #       annotations:
+    #         summary: {{`"Low free RAM for {{ $labels.dbinstance_identifier }} instance."`}}
+    #         description: "RDS instance is having less than {{ .Values.alerts.free_rds_ram_critical_threshold }} for 15mins"
+    #         runbook_url: "https://runbooks.extratools.works"

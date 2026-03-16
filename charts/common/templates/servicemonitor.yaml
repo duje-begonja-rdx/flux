@@ -1,0 +1,15 @@
+{{- if .Values.serviceMonitor.enabled }}
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  labels:
+    release: prometheus-operator
+  name: {{ template "application.name" . }}-svc-monitor
+spec:
+  endpoints:
+  {{- toYaml .Values.serviceMonitor.endpoints | indent 4 }}
+  selector:
+    matchLabels: 
+      {{- include "application.selectorLabels" | nindent 6 }}
+{{- end }}

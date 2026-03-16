@@ -1,0 +1,7 @@
+services:
+  python-endpoint-counter:
+    build: .
+    ports:
+      - "5000:5000"
+    environment:
+      FLASK_PORT: "5000"

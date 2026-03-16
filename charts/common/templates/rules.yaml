@@ -1,0 +1,78 @@
+{{- if .Values.alerts.enabled -}}
+
+{{- $ns := .Release.Namespace -}}
+{{- $env := .Values.alerts_common_info.labels.env }}
+{{- $cluster := .Values.alerts_common_info.labels.cluster -}}
+
+
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: {{ include "application.fullname" . }}
+  labels:
+    {{- include "application.labels" . | nindent 4 }}
+spec:
+  groups:
+
+{{ if .Values.alerts.aws_alerts.enabled }}
+  - name: AWS-Infrastructure
+    rules:
+    - alert: RDS-CPUUtilizationHigh
+      expr: aws_rds_cpuutilization_average *on(dbinstance_identifier) group_left(tag_radixdlt_rds_cluster) aws_resource_info{tag_radixdlt_rds_cluster="{{ .Values.alerts_common_info.aws_rds_cluster_name }}"} > {{ .Values.alerts_aws_info.cpu_utillization_warning_threshold }}
+      labels:
+        severity: warning
+        env: {{ $env }}
+        cluster: {{ $cluster }}
+        tier: application
+        application: blend
+        namespace: {{ $ns }}
+      for: 15m
+      annotations:
+        summary: "RDS CPU utilization for {{`{{ $labels.dbinstance_identifier }}`}} node is higher than {{ .Values.alerts_aws_info.cpu_utillization_warning_threshold }}% for 15 mins."
+        description: "High CPU utilization of RDS instance."
+
+    - alert: RDS-CPUUtilizationCritical
+      expr: aws_rds_cpuutilization_average *on(dbinstance_identifier) group_left(tag_radixdlt_rds_cluster) aws_resource_info{tag_radixdlt_rds_cluster="{{ .Values.alerts_common_info.aws_rds_cluster_name }}"} > {{ .Values.alerts_aws_info.cpu_utillization_critical_threshold }}
+      labels:
+        severity: critical
+        env: {{ $env }}
+        cluster: {{ $cluster }}
+        tier: application
+        application: blend
+        namespace: {{ $ns }}
+      for: 30m
+      annotations:
+        summary: "RDS CPU utilization for {{`{{ $labels.dbinstance_identifier }}`}} node is higher than {{ .Values.alerts_aws_info.cpu_utillization_critical_threshold }}% for 15 mins."
+        description: "High CPU utilization of RDS instance."
+
+    - alert: RDS-LowFreeRAMHigh
+      expr: aws_rds_freeable_memory_average *on(dbinstance_identifier) group_left(tag_radixdlt_rds_cluster) aws_resource_info{tag_radixdlt_rds_cluster="{{ .Values.alerts_common_info.aws_rds_cluster_name }}"} < {{ .Values.alerts_aws_info.free_rds_ram_warning_threshold_in_bytes }}
+      labels:
+        severity: warning
+        env: {{ $env }}
+        cluster: {{ $cluster }}
+        tier: application
+        application: blend
+        namespace: {{ $ns }}
+      for: 15m
+      annotations:
+        summary: "RDS free RAM for {{`{{ $labels.dbinstance_identifier }}`}} node is lower than {{ .Values.alerts_aws_info.free_rds_ram_warning_threshold }} for 15 mins."
+        description: "Low free RAM for RDS instance."
+
+    - alert: RDS-LowFreeRAMCritical
+      expr: aws_rds_freeable_memory_average *on(dbinstance_identifier) group_left(tag_radixdlt_rds_cluster) aws_resource_info{tag_radixdlt_rds_cluster="{{ .Values.alerts_common_info.aws_rds_cluster_name }}"} < {{ .Values.alerts_aws_info.free_rds_ram_critical_threshold_in_bytes }}
+      labels:
+        severity: critical
+        env: {{ $env }}
+        cluster: {{ $cluster }}
+        tier: application
+        application: blend
+        namespace: {{ $ns }}
+      for: 30m
+      annotations:
+        summary: "RDS free RAM for {{`{{ $labels.dbinstance_identifier }}`}} node is lower than {{ .Values.alerts_aws_info.free_rds_ram_critical_threshold }} for 15 mins."
+        description: "Low free RAM for RDS instance."
+
+{{ end }}
+
+{{- end -}}
