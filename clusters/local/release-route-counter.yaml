@@ -60,5 +60,5 @@ spec:
         - host: dev-route-counter.localhost
           paths:
             - path: /
-              pathType: ImplementationSpecific
+              pathType: Prefix
               servicePort: 80
