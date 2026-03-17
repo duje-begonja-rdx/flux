@@ -28,7 +28,7 @@ spec:
       interval: 20m
       chart: ./charts/ethereum-component
       valuesFiles:
-        - charts/ethereum-component/geth-values.yaml
+        - ./charts/ethereum-component/geth-values.yaml
       sourceRef:
         kind: GitRepository
         name: proprietary
@@ -53,6 +53,7 @@ spec:
       interval: 20m
       chart: ./charts/ethereum-component
       valuesFiles:
+        - charts/ethereum-component/values.yaml
         - charts/ethereum-component/prysm-values.yaml
       sourceRef:
         kind: GitRepository
