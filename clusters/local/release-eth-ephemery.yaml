@@ -91,6 +91,9 @@ spec:
       servicePort: 6060
       path: /debug/metrics/prometheus
     resources:
+      requests:
+        cpu: 500m
+        memory: 1Gi
       limits:
         cpu: 4
         memory: 8Gi
@@ -159,6 +162,9 @@ spec:
       servicePort: 8080
       path: /metrics
     resources:
+      requests:
+        cpu: 500m
+        memory: 1Gi
       limits:
         cpu: 2
         memory: 7Gi
