@@ -1,0 +1,66 @@
+image:
+  repository: sigp/lighthouse
+  tag: v8.0.1
+  pullPolicy: IfNotPresent
+
+replicaCount: 1
+containerName: lighthouse
+
+storage:
+  claimName: data
+  size: 60Gi
+  accessMode: ReadWriteOnce
+
+jwt:
+  secretName: eth-jwt
+  key: jwt.hex
+  mountPath: /jwt
+
+args:
+  - "lighthouse"
+  - "beacon_node"
+  - "--network=ephemery"
+  - "--datadir=/data"
+  - "--execution-endpoint=http://eth-geth-0.eth-geth.{{ .Release.Namespace }}.svc:8551"
+  - "--execution-jwt=/jwt/jwt.hex"
+  - "--checkpoint-sync-url=https://checkpoint-sync.ephemery.ethpandaops.io"
+  - "--http"
+  - "--http-address=0.0.0.0"
+  - "--metrics"
+  - "--metrics-address=0.0.0.0"
+  - "--metrics-port=5054"
+  - "--port=9000"
+  - "--discovery-port=9000"
+  - "--quic-port=9001"
+
+ports:
+  - name: p2p-tcp
+    containerPort: 9000
+    servicePort: 9000
+    protocol: TCP
+  - name: p2p-udp
+    containerPort: 9000
+    servicePort: 9000
+    protocol: UDP
+  - name: quic
+    containerPort: 9001
+    servicePort: 9001
+    protocol: UDP
+  - name: monitoring
+    containerPort: 5054
+    servicePort: 5054
+    protocol: TCP
+
+metrics:
+  enabled: true
+  portName: monitoring
+  servicePort: 5054
+  path: /metrics
+
+resources:
+  requests:
+    cpu: 500m
+    memory: 1Gi
+  limits:
+    cpu: 2
+    memory: 6Gi

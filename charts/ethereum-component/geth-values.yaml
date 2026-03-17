@@ -1,0 +1,71 @@
+image:
+  repository: ethereum/client-go
+  tag: v1.16.8
+  pullPolicy: IfNotPresent
+
+replicaCount: 1
+containerName: geth
+
+storage:
+  claimName: data
+  size: 60Gi
+  accessMode: ReadWriteOnce
+
+jwt:
+  secretName: eth-jwt
+  key: jwt.hex
+  mountPath: /jwt
+
+params:
+  GETH_DATADIR: "/data"
+  GETH_SYNCMODE: "snap"
+  GETH_VERBOSITY: "3"
+  GETH_PORT: "30303"
+  GETH_HTTP: "true"
+  GETH_HTTP_ADDR: "0.0.0.0"
+  GETH_HTTP_PORT: "8545"
+  GETH_HTTP_API: "eth,net,web3,admin"
+  GETH_HTTP_VHOSTS: "*"
+  GETH_AUTHRPC_ADDR: "0.0.0.0"
+  GETH_AUTHRPC_PORT: "8551"
+  GETH_AUTHRPC_VHOSTS: "*"
+  GETH_AUTHRPC_JWTSECRET: "/jwt/jwt.hex"
+  GETH_METRICS: "true"
+  GETH_METRICS_ADDR: "0.0.0.0"
+  GETH_METRICS_PORT: "6060"
+
+ports:
+  - name: p2p-tcp
+    containerPort: 30303
+    servicePort: 30303
+    protocol: TCP
+  - name: p2p-udp
+    containerPort: 30303
+    servicePort: 30303
+    protocol: UDP
+  - name: authrpc
+    containerPort: 8551
+    servicePort: 8551
+    protocol: TCP
+  - name: json-rpc
+    containerPort: 8545
+    servicePort: 8545
+    protocol: TCP
+  - name: metrics
+    containerPort: 6060
+    servicePort: 6060
+    protocol: TCP
+
+metrics:
+  enabled: true
+  portName: metrics
+  servicePort: 6060
+  path: /debug/metrics/prometheus
+
+resources:
+  requests:
+    cpu: 500m
+    memory: 1Gi
+  limits:
+    cpu: 4
+    memory: 8Gi

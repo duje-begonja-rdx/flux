@@ -1,0 +1,58 @@
+image:
+  repository: prysmaticlabs/prysm-beacon-chain
+  tag: v7.1.2
+  pullPolicy: IfNotPresent
+
+replicaCount: 1
+containerName: prysm-beacon
+
+storage:
+  claimName: data
+  size: 60Gi
+  accessMode: ReadWriteOnce
+
+jwt:
+  secretName: eth-jwt
+  key: jwt.hex
+  mountPath: /jwt
+
+args:
+  - "--sepolia"
+  - "--datadir=/data"
+  - "--accept-terms-of-use"
+  - "--verbosity=info"
+  - "--checkpoint-sync-url=https://sepolia.beaconstate.info"
+  - "--genesis-beacon-api-url=https://sepolia.beaconstate.info"
+  - "--execution-endpoint=http://eth-geth-0.eth-geth.{{ .Release.Namespace }}.svc:8551"
+  - "--jwt-secret=/jwt/jwt.hex"
+  - "--p2p-tcp-port=13000"
+  - "--p2p-udp-port=12000"
+  - "--monitoring-host=0.0.0.0"
+
+ports:
+  - name: p2p-tcp
+    containerPort: 13000
+    servicePort: 13000
+    protocol: TCP
+  - name: p2p-udp
+    containerPort: 12000
+    servicePort: 12000
+    protocol: UDP
+  - name: monitoring
+    containerPort: 8080
+    servicePort: 8080
+    protocol: TCP
+
+metrics:
+  enabled: true
+  portName: monitoring
+  servicePort: 8080
+  path: /metrics
+
+resources:
+  requests:
+    cpu: 500m
+    memory: 1Gi
+  limits:
+    cpu: 2
+    memory: 7Gi

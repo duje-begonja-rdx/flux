@@ -6,6 +6,7 @@ resources:
   - ./repositories.yaml
   - ./release-route-counter.yaml
   - ./release-eth-sepolia.yaml
+  - ./release-eth-ephemery.yaml
 patches:
   - target:
       group: helm.toolkit.fluxcd.io

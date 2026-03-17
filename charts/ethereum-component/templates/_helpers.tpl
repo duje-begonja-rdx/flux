@@ -32,15 +32,3 @@ app.kubernetes.io/component: {{ include "ethereum-component.name" .context }}
 {{- define "ethereum-component.metricsServiceName" -}}
 {{ printf "%s-metrics" (include "ethereum-component.fullname" .) | trunc 63 | trimSuffix "-" }}
 {{- end -}}
-
-{{- define "ethereum-component.prysmName" -}}
-{{ printf "%s-prysm" (include "ethereum-component.fullname" .) | trunc 63 | trimSuffix "-" }}
-{{- end -}}
-
-{{- define "ethereum-component.prysmHeadlessServiceName" -}}
-{{ include "ethereum-component.prysmName" . }}
-{{- end -}}
-
-{{- define "ethereum-component.prysmMetricsServiceName" -}}
-{{ printf "%s-metrics" (include "ethereum-component.prysmName" .) | trunc 63 | trimSuffix "-" }}
-{{- end -}}
