@@ -28,7 +28,7 @@ spec:
       interval: 20m
       chart: ./charts/ethereum-component
       valuesFiles:
-        - geth-values.yaml
+        - charts/ethereum-component/geth-values.yaml
       sourceRef:
         kind: GitRepository
         name: proprietary
@@ -53,7 +53,7 @@ spec:
       interval: 20m
       chart: ./charts/ethereum-component
       valuesFiles:
-        - lighthouse-values.yaml
+        - charts/ethereum-component/lighthouse-values.yaml
       sourceRef:
         kind: GitRepository
         name: proprietary
