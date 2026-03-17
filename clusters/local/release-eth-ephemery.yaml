@@ -109,6 +109,7 @@ spec:
   targetNamespace: ethereum-ephemery
   chart:
     spec:
+      reconcileStrategy: Revision
       interval: 20m
       chart: ./charts/ethereum-component
       sourceRef:
