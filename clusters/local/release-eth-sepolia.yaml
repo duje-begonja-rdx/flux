@@ -2,13 +2,13 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: ethereum-ephemery
+  name: ethereum-sepolia
 ---
 apiVersion: v1
 kind: Secret
 metadata:
   name: eth-jwt
-  namespace: ethereum-ephemery
+  namespace: ethereum-sepolia
 type: Opaque
 stringData:
   jwt.hex: "5dd19aa4d37f907a32ebc12f90e4e845a4566198e712faf6972e1df369fea7e5"
@@ -17,11 +17,11 @@ apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
   name: eth-geth
-  namespace: ethereum-ephemery
+  namespace: ethereum-sepolia
 spec:
   releaseName: eth-geth
   interval: 20m
-  targetNamespace: ethereum-ephemery
+  targetNamespace: ethereum-sepolia
   chart:
     spec:
       interval: 20m
@@ -47,7 +47,7 @@ spec:
       key: jwt.hex
       mountPath: /jwt
     params:
-      GETH_EPHEMERY: "true"
+      GETH_SEPOLIA: "true"
       GETH_DATADIR: "/data"
       GETH_SYNCMODE: "snap"
       GETH_VERBOSITY: "3"
@@ -102,11 +102,11 @@ apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
   name: eth-prysm
-  namespace: ethereum-ephemery
+  namespace: ethereum-sepolia
 spec:
   releaseName: eth-prysm
   interval: 20m
-  targetNamespace: ethereum-ephemery
+  targetNamespace: ethereum-sepolia
   chart:
     spec:
       reconcileStrategy: Revision
@@ -133,13 +133,11 @@ spec:
       key: jwt.hex
       mountPath: /jwt
     args:
-      - "--ephemery"
+      - "--sepolia"
       - "--datadir=/data"
       - "--accept-terms-of-use"
       - "--verbosity=info"
-      - "--checkpoint-sync-url=https://checkpoint-sync.ephemery.ethpandaops.io"
-      - "--genesis-beacon-api-url=https://checkpoint-sync.ephemery.ethpandaops.io"
-      - "--execution-endpoint=http://eth-geth-0.eth-geth.{{ .Release.Namespace }}.svc:8551"
+      - "--execution-endpoint=http://eth-geth-0.eth-geth.ethereum-sepolia.svc:8551"
       - "--jwt-secret=/jwt/jwt.hex"
       - "--p2p-tcp-port=13000"
       - "--p2p-udp-port=12000"
