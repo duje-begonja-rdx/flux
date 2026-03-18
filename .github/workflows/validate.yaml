@@ -1,0 +1,47 @@
+name: Validate
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install kubeconform
+        run: |
+          curl -sSL -o kubeconform.tar.gz https://github.com/yannh/kubeconform/releases/download/v0.6.7/kubeconform-linux-amd64.tar.gz
+          tar -xzf kubeconform.tar.gz kubeconform
+          sudo mv kubeconform /usr/local/bin/kubeconform
+
+      - name: Install Checkov
+        run: pip install checkov
+
+      - name: Lint Ethereum chart
+        run: helm lint eth-comps/chart
+
+      - name: Lint common chart
+        run: helm lint charts/common
+
+      - name: Render Ethereum chart
+        run: helm template eth-geth eth-comps/chart
+
+      - name: Validate Ethereum chart manifests
+        run: helm template eth-geth eth-comps/chart | kubeconform -summary -strict
+
+      - name: Validate local cluster manifests
+        run: kubectl kustomize clusters/local | kubeconform -summary -strict -ignore-missing-schemas
+
+      - name: Checkov scan
+        run: checkov -d . --quiet
