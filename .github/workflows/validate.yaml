@@ -29,16 +29,16 @@ jobs:
         run: pip install checkov
 
       - name: Lint Ethereum chart
-        run: helm lint eth-comps/chart
+        run: helm lint charts/ethereum-component
 
       - name: Lint common chart
         run: helm lint charts/common
 
       - name: Render Ethereum chart
-        run: helm template eth-geth eth-comps/chart
+        run: helm template eth-geth charts/ethereum-component
 
       - name: Validate Ethereum chart manifests
-        run: helm template eth-geth eth-comps/chart | kubeconform -summary -strict
+        run: helm template eth-geth charts/ethereum-component | kubeconform -summary -strict
 
       - name: Validate local cluster manifests
         run: kubectl kustomize clusters/local | kubeconform -summary -strict -ignore-missing-schemas
