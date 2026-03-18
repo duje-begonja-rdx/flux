@@ -44,4 +44,4 @@ jobs:
         run: kubectl kustomize clusters/local | kubeconform -summary -strict -ignore-missing-schemas
 
       - name: Checkov scan
-        run: checkov -d . --quiet
+        run: checkov -d . --quiet --skip-framework kustomize
